@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网格标记工具 - 全新设计</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .upload-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .upload-btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        /* 参数控制面板 */
+        .controls-panel {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+        }
+
+        .control-value {
+            display: inline-block;
+            min-width: 40px;
+            text-align: right;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .detect-btn {
+            background: #10b981;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .detect-btn:hover { 
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        /* 缩放控制器 - 更醒目 */
+        .zoom-panel {
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .zoom-btn {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 22px;
+            font-weight: bold;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+        }
+
+        .zoom-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .zoom-slider {
+            width: 250px;
+            height: 8px;
+        }
+
+        .zoom-info {
+            min-width: 80px;
+            text-align: center;
+            font-weight: 700;
+            color: #667eea;
+            font-size: 20px;
+            background: #f0f9ff;
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 2px solid #bae6fd;
+        }
+
+        /* 起点选择 */
+        .position-selector {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 3px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .position-selector h3 {
+            color: #92400e;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .position-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-width: 600px;
+        }
+
+        .position-btn {
+            padding: 15px;
+            border: 3px solid #fbbf24;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .position-btn:hover {
+            background: #fef3c7;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        }
+
+        .position-btn.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        /* 网格容器 - 全新设计 */
+        .grid-container {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .grid-wrapper {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            display: inline-block;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .grid-table {
+            display: grid;
+            gap: 0;
+            border: 2px solid #64748b;
+            background: #64748b;
+            user-select: none;
+        }
+
+        .grid-cell {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #cbd5e1;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-weight: 700;
+            font-size: 14px;
+            color: #000;
+            text-shadow: 
+                -1px -1px 0 #fff,
+                1px -1px 0 #fff,
+                -1px 1px 0 #fff,
+                1px 1px 0 #fff,
+                0 0 3px #fff;
+        }
+
+        .grid-cell:hover {
+            transform: scale(1.15);
+            z-index: 10;
+            box-shadow: 0 0 0 3px #667eea, 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-color: #667eea;
+        }
+
+        .grid-cell.marked {
+            background-color: rgba(76, 175, 80, 0.4) !important;
+            border-color: #4CAF50 !important;
+        }
+
+        .grid-cell.start-point {
+            box-shadow: inset 0 0 0 3px #4CAF50, 0 0 15px rgba(76, 175, 80, 0.6);
+        }
+
+        .grid-cell.end-point {
+            box-shadow: inset 0 0 0 3px #2196F3, 0 0 15px rgba(33, 150, 243, 0.6);
+        }
+
+        .grid-cell.corner {
+            box-shadow: inset 0 0 0 2px #ef4444;
+        }
+
+        .cell-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            font-size: inherit;
+        }
+
+        /* 操作按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-btn.undo { background: #f59e0b; color: white; }
+        .action-btn.clear { background: #ef4444; color: white; }
+        .action-btn.download { background: #3b82f6; color: white; }
+
+        .action-btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        }
+
+        .action-btn:disabled { 
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 统计面板 */
+        .stats-panel {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 3px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .stats-panel h4 {
+            color: #0369a1;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 18px;
+            border-radius: 10px;
+            border: 2px solid #bae6fd;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0ea5e9;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #e0f2fe;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0ea5e9 0%, #06b6d4 100%);
+            transition: width 0.3s;
+        }
+
+        .hidden { display: none; }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 15px 20px;
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #166534;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .status-message.error {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        /* 格子尺寸控制 */
+        .size-control {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .size-control h4 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .size-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .size-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.2s;
+        }
+
+        .size-btn:hover {
+            background: #f0f9ff;
+            transform: scale(1.05);
+        }
+
+        .size-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* 工具提示 */
+        .hint-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 20px 0;
+            text-align: center;
+            color: #92400e;
+        }
+
+        .hint-box strong {
+            color: #78350f;
+        }
+
+        /* 居中容器 */
+        .grid-scroll-container {
+            text-align: center;
+            overflow: auto;
+            max-height: 80vh;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 平滑滚动 */
+        .grid-scroll-container {
+            scroll-behavior: smooth;
+        }
+
+        /* 自定义滚动条 */
+        .grid-scroll-container::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        .grid-scroll-container::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 6px;
+        }
+
+        .grid-scroll-container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 6px;
+        }
+
+        .grid-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 网格标记工具 - 全新体验</h1>
+        <p class="subtitle">基于HTML Grid设计 | 数字清晰 | 缩放完美 | 操作流畅</p>
+
+        <div class="upload-section">
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                📁 选择包含网格的图片
+            </button>
+        </div>
+
+        <div class="controls-panel hidden" id="controlsPanel">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label>边缘阈值: <span class="control-value" id="thresholdValue">150</span></label>
+                    <input type="range" id="threshold" min="50" max="300" value="150" step="10">
+                </div>
+                <div class="control-group">
+                    <label>线条容差: <span class="control-value" id="toleranceValue">10</span></label>
+                    <input type="range" id="tolerance" min="3" max="30" value="10" step="1">
+                </div>
+                <div class="control-group">
+                    <label>采样率: <span class="control-value" id="sampleRateValue">2</span></label>
+                    <input type="range" id="sampleRate" min="1" max="5" value="2" step="1">
+                </div>
+                <div class="control-group">
+                    <label>颜色敏感度: <span class="control-value" id="colorSensitivityValue">30</span></label>
+                    <input type="range" id="colorSensitivity" min="10" max="100" value="30" step="5">
+                </div>
+            </div>
+            <button class="detect-btn" id="detectBtn">🔍 重新检测网格</button>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p style="font-size: 16px;">正在智能分析图片...</p>
+        </div>
+
+        <div id="statusMessage" class="hidden"></div>
+
+        <!-- 格子大小控制 -->
+        <div id="sizeControl" class="size-control hidden">
+            <h4>📏 调整格子显示大小（让数字更清晰）</h4>
+            <div class="size-options">
+                <button class="size-btn" data-size="small">小 (20px)</button>
+                <button class="size-btn" data-size="medium">中 (30px)</button>
+                <button class="size-btn active" data-size="large">大 (40px)</button>
+                <button class="size-btn" data-size="xlarge">特大 (50px)</button>
+                <button class="size-btn" data-size="xxlarge">超大 (60px)</button>
+            </div>
+        </div>
+
+        <!-- 缩放控制 -->
+        <div id="zoomPanel" class="zoom-panel hidden">
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoomOutBtn" title="缩小">-</button>
+                <input type="range" class="zoom-slider" id="zoomSlider" min="50" max="200" value="100" step="5">
+                <button class="zoom-btn" id="zoomInBtn" title="放大">+</button>
+                <div class="zoom-info" id="zoomInfo">100%</div>
+                <button class="zoom-btn" id="zoomFitBtn" title="适应窗口" style="font-size: 18px;">⊡</button>
+            </div>
+        </div>
+
+        <!-- 起点选择 -->
+        <div id="positionSelector" class="position-selector hidden">
+            <h3>📍 选择钩织起点</h3>
+            <div class="position-grid">
+                <button class="position-btn active" data-position="top-left">↖️ 左上角</button>
+                <button class="position-btn" data-position="top-right">↗️ 右上角</button>
+                <button class="position-btn" data-position="bottom-left">↙️ 左下角</button>
+                <button class="position-btn" data-position="bottom-right">↘️ 右下角</button>
+            </div>
+        </div>
+
+        <div class="hint-box hidden" id="hintBox">
+            💡 <strong>提示：</strong>点击任意格子，程序会自动用S形路径连接起点和该格子，并显示标记。
+            点击的格子会自动滚动到可见区域！
+        </div>
+
+        <!-- 网格显示区域 -->
+        <div id="gridContainer" class="grid-scroll-container hidden">
+            <div class="grid-wrapper">
+                <div id="gridTable" class="grid-table"></div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div id="actionButtons" class="action-buttons hidden">
+            <button class="action-btn undo" id="undoBtn" disabled>↶ 撤销</button>
+            <button class="action-btn clear" id="clearBtn" disabled>🗑️ 清除</button>
+            <button class="action-btn download" id="downloadBtn">💾 下载</button>
+        </div>
+
+        <!-- 统计面板 -->
+        <div id="statsPanel" class="stats-panel hidden">
+            <h4>📊 标记统计</h4>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">网格尺寸</div>
+                    <div class="stat-value" id="gridSize">0 × 0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">总格子数</div>
+                    <div class="stat-value" id="totalCells">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">已标记</div>
+                    <div class="stat-value" id="markedCells">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">完成进度</div>
+                    <div class="stat-value" id="progress">0%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+class GridDetector { constructor() { this.canvas = document.createElement('canvas'); this.ctx = this.canvas.getContext('2d', { willReadFrequently: true }); } detectGrid(image, options = {}) { const { edgeThreshold = 150, lineTolerance = 10, sampleRate = 2 } = options; this.canvas.width = image.width; this.canvas.height = image.height; this.ctx.drawImage(image, 0, 0); const imageData = this.ctx.getImageData(0, 0, image.width, image.height); const grayData = this.toGrayscale(imageData.data, image.width, image.height); const vLines = this.detectVerticalLines(grayData, image.width, image.height, edgeThreshold, lineTolerance, sampleRate); const hLines = this.detectHorizontalLines(grayData, image.width, image.height, edgeThreshold, lineTolerance, sampleRate); const cols = Math.max(0, vLines.length - 1); const rows = Math.max(0, hLines.length - 1); return { verticalLines: vLines, horizontalLines: hLines, rows, cols, gridDetected: rows > 0 && cols > 0 }; } autoCropBorders(image, vLines, hLines, padding = 5) { if (vLines.length < 2 || hLines.length < 2) { const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height; canvas.getContext('2d').drawImage(image, 0, 0); return canvas; } const x1 = Math.max(0, vLines[0] - padding); const x2 = Math.min(image.width, vLines[vLines.length - 1] + padding); const y1 = Math.max(0, hLines[0] - padding); const y2 = Math.min(image.height, hLines[hLines.length - 1] + padding); const canvas = document.createElement('canvas'); canvas.width = x2 - x1; canvas.height = y2 - y1; const ctx = canvas.getContext('2d'); ctx.drawImage(image, x1, y1, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height); return canvas; } extractCellColors(image, rows, cols) { const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height; const ctx = canvas.getContext('2d'); ctx.drawImage(image, 0, 0); const cellWidth = image.width / cols; const cellHeight = image.height / rows; const cellColors = []; for (let row = 0; row < rows; row++) { const rowColors = []; for (let col = 0; col < cols; col++) { const centerX = Math.floor(col * cellWidth + cellWidth / 2); const centerY = Math.floor(row * cellHeight + cellHeight / 2); const sampleSize = Math.min(cellWidth, cellHeight) * 0.3; const startX = Math.max(0, Math.floor(centerX - sampleSize / 2)); const startY = Math.max(0, Math.floor(centerY - sampleSize / 2)); const size = Math.max(1, Math.ceil(sampleSize)); const imageData = ctx.getImageData(startX, startY, size, size); const avgColor = this.calculateAverageColor(imageData); rowColors.push(avgColor); } cellColors.push(rowColors); } return cellColors; } calculateAverageColor(imageData) { const data = imageData.data; let r = 0, g = 0, b = 0, count = 0; for (let i = 0; i < data.length; i += 4) { r += data[i]; g += data[i + 1]; b += data[i + 2]; count++; } return { r: Math.round(r / count), g: Math.round(g / count), b: Math.round(b / count), hex: this.rgbToHex(Math.round(r / count), Math.round(g / count), Math.round(b / count)) }; } rgbToHex(r, g, b) { const toHex = (n) => { const hex = n.toString(16); return hex.length === 1 ? '0' + hex : hex; }; return `#${toHex(r)}${toHex(g)}${toHex(b)}`; } toGrayscale(data, width, height) { const gray = new Uint8Array(width * height); for (let i = 0, j = 0; i < data.length; i += 4, j++) { gray[j] = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]); } return gray; } detectVerticalLines(grayData, width, height, threshold, tolerance, sampleRate) { const edgeStrength = new Array(width).fill(0); for (let x = 1; x < width - 1; x++) { let strength = 0, samples = 0; for (let y = 1; y < height - 1; y += sampleRate) { const idx = y * width + x; const gx = -grayData[idx - 1 - width] + grayData[idx + 1 - width] + -2 * grayData[idx - 1] + 2 * grayData[idx + 1] + -grayData[idx - 1 + width] + grayData[idx + 1 + width]; strength += Math.abs(gx); samples++; } edgeStrength[x] = samples > 0 ? strength / samples : 0; } const lines = []; const avgStrength = edgeStrength.reduce((a, b) => a + b, 0) / width; const adaptiveThreshold = Math.max(threshold, avgStrength * 1.5); for (let x = 1; x < width - 1; x++) { if (edgeStrength[x] > adaptiveThreshold && edgeStrength[x] >= edgeStrength[x - 1] && edgeStrength[x] >= edgeStrength[x + 1]) { if (lines.length === 0 || x - lines[lines.length - 1] > tolerance) { lines.push(x); } } } return lines; } detectHorizontalLines(grayData, width, height, threshold, tolerance, sampleRate) { const edgeStrength = new Array(height).fill(0); for (let y = 1; y < height - 1; y++) { let strength = 0, samples = 0; for (let x = 1; x < width - 1; x += sampleRate) { const idx = y * width + x; const gy = -grayData[idx - width - 1] - 2 * grayData[idx - width] - grayData[idx - width + 1] + grayData[idx + width - 1] + 2 * grayData[idx + width] + grayData[idx + width + 1]; strength += Math.abs(gy); samples++; } edgeStrength[y] = samples > 0 ? strength / samples : 0; } const lines = []; const avgStrength = edgeStrength.reduce((a, b) => a + b, 0) / height; const adaptiveThreshold = Math.max(threshold, avgStrength * 1.5); for (let y = 1; y < height - 1; y++) { if (edgeStrength[y] > adaptiveThreshold && edgeStrength[y] >= edgeStrength[y - 1] && edgeStrength[y] >= edgeStrength[y + 1]) { if (lines.length === 0 || y - lines[lines.length - 1] > tolerance) { lines.push(y); } } } return lines; } } class CrochetPathGenerator { constructor() { this.startPosition = 'top-left'; } setStartPosition(position) { this.startPosition = position; } generateSPath(startPoint, targetPoint, totalRows, totalCols) { const path = []; const visited = new Set(); const actualStart = this.getActualStartPoint(totalRows, totalCols); const { startRow, direction } = this.getTraversalDirection(totalRows, totalCols); const rowRange = this.getRowRange(startRow, totalRows); let currentDirection = direction; let foundTarget = false; for (let row of rowRange) { const colRange = this.getRowColumnRange(currentDirection, totalCols); for (let col of colRange) { const pointKey = `${row},${col}`; if (!visited.has(pointKey)) { path.push({ row, col }); visited.add(pointKey); if (row === targetPoint.row && col === targetPoint.col) { foundTarget = true; break; } } } if (foundTarget) break; currentDirection *= -1; } return path; } getActualStartPoint(totalRows, totalCols) { switch (this.startPosition) { case 'top-left': return { row: 0, col: 0 }; case 'top-right': return { row: 0, col: totalCols - 1 }; case 'bottom-left': return { row: totalRows - 1, col: 0 }; case 'bottom-right': return { row: totalRows - 1, col: totalCols - 1 }; default: return { row: 0, col: 0 }; } } getTraversalDirection(totalRows, totalCols) { let startRow, direction; switch (this.startPosition) { case 'top-left': startRow = 0; direction = 1; break; case 'top-right': startRow = 0; direction = -1; break; case 'bottom-left': startRow = totalRows - 1; direction = 1; break; case 'bottom-right': startRow = totalRows - 1; direction = -1; break; default: startRow = 0; direction = 1; } return { startRow, direction }; } getRowColumnRange(direction, totalCols) { const cols = []; if (direction === 1) { for (let col = 0; col < totalCols; col++) cols.push(col); } else { for (let col = totalCols - 1; col >= 0; col--) cols.push(col); } return cols; } getRowRange(startRow, totalRows) { const rows = []; if (this.startPosition.startsWith('top')) { for (let row = 0; row < totalRows; row++) rows.push(row); } else { for (let row = totalRows - 1; row >= 0; row--) rows.push(row); } return rows; } } const fileInput = document.getElementById('fileInput'); const controlsPanel = document.getElementById('controlsPanel'); const loading = document.getElementById('loading'); const statusMessage = document.getElementById('statusMessage'); const sizeControl = document.getElementById('sizeControl'); const zoomPanel = document.getElementById('zoomPanel'); const positionSelector = document.getElementById('positionSelector'); const hintBox = document.getElementById('hintBox'); const gridContainer = document.getElementById('gridContainer'); const gridTable = document.getElementById('gridTable'); const actionButtons = document.getElementById('actionButtons'); const statsPanel = document.getElementById('statsPanel'); const thresholdInput = document.getElementById('threshold'); const toleranceInput = document.getElementById('tolerance'); const sampleRateInput = document.getElementById('sampleRate'); const colorSensitivityInput = document.getElementById('colorSensitivity'); const detectBtn = document.getElementById('detectBtn'); const zoomSlider = document.getElementById('zoomSlider'); const zoomInBtn = document.getElementById('zoomInBtn'); const zoomOutBtn = document.getElementById('zoomOutBtn'); const zoomFitBtn = document.getElementById('zoomFitBtn'); const zoomInfo = document.getElementById('zoomInfo'); const undoBtn = document.getElementById('undoBtn'); const clearBtn = document.getElementById('clearBtn'); const downloadBtn = document.getElementById('downloadBtn'); const detector = new GridDetector(); const pathGenerator = new CrochetPathGenerator(); let currentImage = null; let croppedImage = null; let gridResult = null; let startPosition = 'top-left'; let markedCells = new Set(); let currentPath = []; let rows = 0; let cols = 0; let cellColors = null; let cellNumbers = null; let colorSensitivity = 30; let cellSize = 'large'; let zoomLevel = 1.0; const cellSizes = { small: 20, medium: 30, large: 40, xlarge: 50, xxlarge: 60 }; thresholdInput.addEventListener('input', (e) => { document.getElementById('thresholdValue').textContent = e.target.value; }); toleranceInput.addEventListener('input', (e) => { document.getElementById('toleranceValue').textContent = e.target.value; }); sampleRateInput.addEventListener('input', (e) => { document.getElementById('sampleRateValue').textContent = e.target.value; }); colorSensitivityInput.addEventListener('input', (e) => { document.getElementById('colorSensitivityValue').textContent = e.target.value; colorSensitivity = parseInt(e.target.value); if (cellColors && rows > 0 && cols > 0) { calculateCellNumbers(); updateGridNumbers(); } }); fileInput.addEventListener('change', async (e) => { const file = e.target.files[0]; if (!file) return; showStatus('正在加载图片...', false); const reader = new FileReader(); reader.onload = (event) => { const img = new Image(); img.onload = () => { currentImage = img; controlsPanel.classList.remove('hidden'); performDetection(); }; img.onerror = () => { showStatus('图片加载失败，请重试', true); }; img.src = event.target.result; }; reader.readAsDataURL(file); }); detectBtn.addEventListener('click', () => { if (currentImage) { performDetection(); } }); document.querySelectorAll('.size-btn').forEach(btn => { btn.addEventListener('click', (e) => { document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); cellSize = e.target.dataset.size; renderGrid(); }); }); document.querySelectorAll('.position-btn').forEach(btn => { btn.addEventListener('click', (e) => { document.querySelectorAll('.position-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); startPosition = e.target.dataset.position; pathGenerator.setStartPosition(startPosition); showStatus(`起点已设置为：${getPositionName(startPosition)}`, false); updateCornerHighlight(); }); }); zoomSlider.addEventListener('input', (e) => { setZoom(parseInt(e.target.value) / 100); }); zoomInBtn.addEventListener('click', () => { const newZoom = Math.min(2.0, zoomLevel + 0.1); setZoom(newZoom); zoomSlider.value = Math.round(newZoom * 100); }); zoomOutBtn.addEventListener('click', () => { const newZoom = Math.max(0.5, zoomLevel - 0.1); setZoom(newZoom); zoomSlider.value = Math.round(newZoom * 100); }); zoomFitBtn.addEventListener('click', () => { setZoom(1.0); zoomSlider.value = 100; }); undoBtn.addEventListener('click', undo); clearBtn.addEventListener('click', clear); downloadBtn.addEventListener('click', download); async function performDetection() { loading.classList.remove('hidden'); hideStatus(); gridContainer.classList.add('hidden'); sizeControl.classList.add('hidden'); zoomPanel.classList.add('hidden'); positionSelector.classList.add('hidden'); hintBox.classList.add('hidden'); actionButtons.classList.add('hidden'); statsPanel.classList.add('hidden'); await new Promise(resolve => setTimeout(resolve, 100)); const options = { edgeThreshold: parseInt(thresholdInput.value), lineTolerance: parseInt(toleranceInput.value), sampleRate: parseInt(sampleRateInput.value) }; try { const initialResult = detector.detectGrid(currentImage, options); if (!initialResult.gridDetected) { showStatus('未检测到网格，请调整参数重试', true); loading.classList.add('hidden'); return; } const croppedCanvas = detector.autoCropBorders( currentImage, initialResult.verticalLines, initialResult.horizontalLines, 5 ); croppedImage = new Image(); await new Promise((resolve) => { croppedImage.onload = resolve; croppedImage.src = croppedCanvas.toDataURL(); }); gridResult = detector.detectGrid(croppedImage, options); if (!gridResult.gridDetected) { showStatus('裁切后检测失败，请重试', true); loading.classList.add('hidden'); return; } rows = gridResult.rows; cols = gridResult.cols; console.log(`✅ 检测成功: ${cols}×${rows} 网格`); cellColors = detector.extractCellColors(croppedImage, rows, cols); calculateCellNumbers(); renderGrid(); loading.classList.add('hidden'); sizeControl.classList.remove('hidden'); zoomPanel.classList.remove('hidden'); positionSelector.classList.remove('hidden'); hintBox.classList.remove('hidden'); gridContainer.classList.remove('hidden'); actionButtons.classList.remove('hidden'); statsPanel.classList.remove('hidden'); showStatus(`✅ 成功识别 ${cols}×${rows} 网格！可以调整格子大小，然后选择起点并开始标记`, false); updateStats(); } catch (error) { console.error('检测失败:', error); showStatus('检测过程出错，请重试', true); loading.classList.add('hidden'); } } function renderGrid() { gridTable.innerHTML = ''; const size = cellSizes[cellSize]; gridTable.style.gridTemplateColumns = `repeat(${cols}, ${size}px)`; gridTable.style.gridTemplateRows = `repeat(${rows}, ${size}px)`; const fontSize = Math.max(10, size * 0.35); for (let row = 0; row < rows; row++) { for (let col = 0; col < cols; col++) { const cell = document.createElement('div'); cell.className = 'grid-cell'; cell.dataset.row = row; cell.dataset.col = col; cell.style.width = `${size}px`; cell.style.height = `${size}px`; cell.style.fontSize = `${fontSize}px`; if (cellColors && cellColors[row] && cellColors[row][col]) { cell.style.backgroundColor = cellColors[row][col].hex; } if (cellNumbers && cellNumbers[row] && cellNumbers[row][col]) { const numberSpan = document.createElement('span'); numberSpan.className = 'cell-number'; numberSpan.textContent = cellNumbers[row][col].number; cell.appendChild(numberSpan); } if ((row === 0 && col === 0) || (row === 0 && col === cols - 1) || (row === rows - 1 && col === 0) || (row === rows - 1 && col === cols - 1)) { cell.classList.add('corner'); } cell.addEventListener('click', () => { markPath(row, col); }); gridTable.appendChild(cell); } } updateCornerHighlight(); console.log(`✅ 网格渲染完成: ${rows}×${cols}，格子大小: ${size}px`); } function updateCornerHighlight() { document.querySelectorAll('.grid-cell.corner').forEach(cell => { const row = parseInt(cell.dataset.row); const col = parseInt(cell.dataset.col); const start = getStartPixel(); if (row === start.row && col === start.col) { cell.classList.add('start-point'); } else { cell.classList.remove('start-point'); } }); } function calculateCellNumbers() { cellNumbers = []; for (let row = 0; row < rows; row++) { const rowNumbers = []; let currentColorGroup = null; let currentNumber = 0; for (let col = 0; col < cols; col++) { const cellColor = cellColors[row][col]; if (currentColorGroup === null || !isSameColor(cellColor, currentColorGroup)) { currentColorGroup = cellColor; currentNumber = 1; } else { currentNumber++; } rowNumbers.push({ number: currentNumber, color: cellColor }); } cellNumbers.push(rowNumbers); } console.log('✅ 数字标注计算完成'); } function updateGridNumbers() { document.querySelectorAll('.grid-cell').forEach(cell => { const row = parseInt(cell.dataset.row); const col = parseInt(cell.dataset.col); if (cellNumbers && cellNumbers[row] && cellNumbers[row][col]) { const numberSpan = cell.querySelector('.cell-number'); if (numberSpan) { numberSpan.textContent = cellNumbers[row][col].number; } } }); console.log('✅ 数字已更新'); } function markPath(targetRow, targetCol) { const start = getStartPixel(); const end = { row: targetRow, col: targetCol }; const path = pathGenerator.generateSPath(start, end, rows, cols); currentPath = path; document.querySelectorAll('.grid-cell.marked, .grid-cell.end-point').forEach(cell => { cell.classList.remove('marked', 'end-point'); }); path.forEach(point => { markedCells.add(`${point.row},${point.col}`); const cell = document.querySelector(`.grid-cell[data-row="${point.row}"][data-col="${point.col}"]`); if (cell) { cell.classList.add('marked'); } }); const endCell = document.querySelector(`.grid-cell[data-row="${targetRow}"][data-col="${targetCol}"]`); if (endCell) { endCell.classList.add('end-point'); } updateStats(); undoBtn.disabled = false; clearBtn.disabled = false; showStatus(`已标记路径：从 ${getPositionName(startPosition)} 到 (${targetRow}, ${targetCol})，共 ${path.length} 个格子`, false); scrollToCell(targetRow, targetCol); } function scrollToCell(row, col) { const cell = document.querySelector(`.grid-cell[data-row="${row}"][data-col="${col}"]`); if (cell) { cell.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }); cell.style.boxShadow = '0 0 0 4px #667eea, 0 0 20px rgba(102, 126, 234, 0.8)'; setTimeout(() => { if (cell.classList.contains('end-point')) { cell.style.boxShadow = ''; } }, 1000); } } function getStartPixel() { switch (startPosition) { case 'top-left': return { row: 0, col: 0 }; case 'top-right': return { row: 0, col: cols - 1 }; case 'bottom-left': return { row: rows - 1, col: 0 }; case 'bottom-right': return { row: rows - 1, col: cols - 1 }; default: return { row: 0, col: 0 }; } } function undo() { if (currentPath.length === 0) return; currentPath.forEach(point => { markedCells.delete(`${point.row},${point.col}`); const cell = document.querySelector(`.grid-cell[data-row="${point.row}"][data-col="${point.col}"]`); if (cell) { cell.classList.remove('marked', 'end-point'); } }); currentPath = []; updateStats(); if (markedCells.size === 0) { undoBtn.disabled = true; clearBtn.disabled = true; } showStatus('已撤销最后一次标记', false); } function clear() { if (!confirm('确定要清除所有标记吗？')) return; markedCells.clear(); currentPath = []; document.querySelectorAll('.grid-cell.marked, .grid-cell.end-point').forEach(cell => { cell.classList.remove('marked', 'end-point'); }); updateStats(); undoBtn.disabled = true; clearBtn.disabled = true; showStatus('已清除所有标记', false); } async function download() { showStatus('正在生成图片...', false); try { const tempCanvas = document.createElement('canvas'); const size = cellSizes[cellSize]; tempCanvas.width = cols * size; tempCanvas.height = rows * size; const ctx = tempCanvas.getContext('2d'); for (let row = 0; row < rows; row++) { for (let col = 0; col < cols; col++) { const cell = document.querySelector(`.grid-cell[data-row="${row}"][data-col="${col}"]`); if (!cell) continue; const x = col * size; const y = row * size; ctx.fillStyle = cell.style.backgroundColor || '#ffffff'; ctx.fillRect(x, y, size, size); if (cell.classList.contains('marked')) { ctx.fillStyle = 'rgba(76, 175, 80, 0.4)'; ctx.fillRect(x, y, size, size); } ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1; ctx.strokeRect(x, y, size, size); const numberSpan = cell.querySelector('.cell-number'); if (numberSpan) { ctx.fillStyle = '#000'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.font = `bold ${size * 0.35}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const text = numberSpan.textContent; ctx.strokeText(text, x + size/2, y + size/2); ctx.fillText(text, x + size/2, y + size/2); } if (cell.classList.contains('start-point')) { ctx.fillStyle = '#4CAF50'; ctx.beginPath(); ctx.arc(x + size/2, y + size/2, size * 0.3, 0, 2 * Math.PI); ctx.fill(); } if (cell.classList.contains('end-point')) { ctx.fillStyle = '#2196F3'; ctx.beginPath(); ctx.arc(x + size/2, y + size/2, size * 0.3, 0, 2 * Math.PI); ctx.fill(); } } } const link = document.createElement('a'); link.download = `crochet-pattern-${cols}x${rows}.png`; link.href = tempCanvas.toDataURL('image/png'); link.click(); showStatus('✅ 图片已下载', false); } catch (error) { console.error('下载失败:', error); showStatus('下载失败，请重试', true); } } function setZoom(zoom) { zoomLevel = zoom; gridTable.style.transform = `scale(${zoom})`; gridTable.style.transformOrigin = 'top left'; zoomInfo.textContent = `${Math.round(zoom * 100)}%`; } function colorDistance(color1, color2) { const dr = color1.r - color2.r; const dg = color1.g - color2.g; const db = color1.b - color2.b; return Math.sqrt(dr * dr + dg * dg + db * db); } function isSameColor(color1, color2) { return colorDistance(color1, color2) < colorSensitivity; } function updateStats() { const total = rows * cols; const marked = markedCells.size; const percent = total > 0 ? ((marked / total) * 100).toFixed(1) : 0; document.getElementById('gridSize').textContent = `${cols} × ${rows}`; document.getElementById('totalCells').textContent = total; document.getElementById('markedCells').textContent = marked; document.getElementById('progress').textContent = `${percent}%`; document.getElementById('progressBar').style.width = `${percent}%`; } function showStatus(message, isError) { statusMessage.textContent = message; statusMessage.className = isError ? 'status-message error' : 'status-message'; statusMessage.classList.remove('hidden'); } function hideStatus() { statusMessage.classList.add('hidden'); } function getPositionName(position) { const names = { 'top-left': '左上角', 'top-right': '右上角', 'bottom-left': '左下角', 'bottom-right': '右下角' }; return names[position] || position; } console.log('🎉 网格标记工具已加载完成！'); console.log('✨ 全新HTML Grid设计，数字清晰，缩放完美，无滚动冲突！');
+    </script>
+</body>
+</html>
+
